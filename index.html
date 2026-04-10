@@ -206,7 +206,12 @@
     </div>
     <div>
       <label for="signupPassword">Password</label>
-      <input type="password" id="signupPassword" placeholder="At least 6 characters" minlength="6" required />
+      <input type="password" id="signupPassword" placeholder="Min 8 chars, 1 uppercase, 1 symbol" required />
+      <ul id="pwRules" style="margin-top:.6rem;padding-left:1.2rem;font-size:.8rem;color:var(--gray);display:flex;flex-direction:column;gap:.2rem;">
+        <li id="rule-length">At least 8 characters</li>
+        <li id="rule-upper">At least 1 uppercase letter</li>
+        <li id="rule-symbol">At least 1 symbol (!@#$%^&* etc.)</li>
+      </ul>
     </div>
     <div class="message" id="signupMsg"></div>
     <button class="btn" type="submit" id="signupBtn">Create Account</button>
@@ -260,6 +265,26 @@
     }
   };
 
+  // Live password rule indicators
+  document.getElementById('signupPassword').addEventListener('input', (e) => {
+    const val = e.target.value;
+    const setRule = (id, passing) => {
+      const el = document.getElementById(id);
+      el.style.color = passing ? '#16a34a' : 'var(--gray)';
+      el.style.fontWeight = passing ? '600' : 'normal';
+    };
+    setRule('rule-length', val.length >= 8);
+    setRule('rule-upper',  /[A-Z]/.test(val));
+    setRule('rule-symbol', /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val));
+  });
+
+  function validatePassword(password) {
+    if (password.length < 8)               return 'Password must be at least 8 characters.';
+    if (!/[A-Z]/.test(password))           return 'Password must contain at least 1 uppercase letter.';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return 'Password must contain at least 1 symbol.';
+    return null;
+  }
+
   // Signup
   window.handleSignup = async (e) => {
     e.preventDefault();
@@ -268,6 +293,13 @@
     const name     = document.getElementById('signupName').value.trim();
     const email    = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
+
+    const pwError = validatePassword(password);
+    if (pwError) {
+      msg.textContent = pwError;
+      msg.className = 'message error';
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = 'Creating account…';
