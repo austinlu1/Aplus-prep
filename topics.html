@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A+Prep — Choose Topic</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #4f6ef7;
+      --cream:     #f7f8fc;
+      --dark:      #1e1e2e;
+      --gray:      #6b7280;
+      --border:    #e5e7eb;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--blue); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .btn-back {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+
+    .btn-back:hover { border-color: var(--blue); color: var(--blue); }
+
+    .btn-logout {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+    main {
+      max-width: 860px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .breadcrumb {
+      font-size: .85rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .page-header { margin-bottom: 2.5rem; }
+
+    .page-header h2 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-bottom: .4rem;
+    }
+
+    .page-header p { color: var(--gray); }
+
+    .topic-list {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+
+    .topic-card {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: var(--dark);
+      transition: all .2s;
+    }
+
+    .topic-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 16px rgba(79,110,247,.12);
+      transform: translateX(4px);
+    }
+
+    .topic-card h4 {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: .2rem;
+    }
+
+    .topic-card p {
+      font-size: .85rem;
+      color: var(--gray);
+    }
+
+    .topic-arrow {
+      color: var(--blue);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-left: 1rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--gray);
+      padding: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="dashboard.html">A+<span>Prep</span></a>
+    <div class="nav-right">
+      <a class="btn-back" id="backBtn" href="grades.html">← Back</a>
+      <button class="btn-logout" id="logoutBtn">Log Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="breadcrumb" id="breadcrumb">
+      <a href="grades.html">Grades</a> › …
+    </div>
+    <div class="page-header">
+      <h2 id="pageTitle">Choose a Topic</h2>
+      <p>Select a topic to start studying.</p>
+    </div>
+    <div class="topic-list" id="topicList">
+      <div class="loading">Loading topics…</div>
+    </div>
+  </main>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = 'https://anookzojonxupbcmwqfg.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFub29rem9qb254dXBiY213cWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzY3NzUsImV4cCI6MjA5MTM1Mjc3NX0.HoluuUkQu6cK4nCKQnsiPZoZB1b2yIEjk3Y227k3awQ';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  const params      = new URLSearchParams(window.location.search);
+  const subjectId   = params.get('subject');
+  const subjectName = params.get('subjectName') || 'Subject';
+  const gradeId     = params.get('grade');
+  const gradeName   = params.get('gradeName') || 'Grade';
+
+  if (!subjectId) { window.location.href = 'grades.html'; }
+
+  document.getElementById('backBtn').href = `subjects.html?grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}`;
+  document.getElementById('breadcrumb').innerHTML = `
+    <a href="grades.html">Grades</a> ›
+    <a href="subjects.html?grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}">${gradeName}</a> ›
+    ${subjectName}
+  `;
+  document.getElementById('pageTitle').textContent = `${subjectName} — Choose a Topic`;
+
+  const { data: topics, error } = await supabase
+    .from('topics')
+    .select('*')
+    .eq('subject_id', subjectId)
+    .order('name');
+
+  const list = document.getElementById('topicList');
+
+  if (error) {
+    list.innerHTML = '<p style="color:#ef4444">Failed to load topics.</p>';
+  } else if (!topics.length) {
+    list.innerHTML = '<p style="color:var(--gray)">No topics available for this subject yet.</p>';
+  } else {
+    list.innerHTML = topics.map(t => `
+      <a class="topic-card"
+         href="study.html?topic=${t.id}&topicName=${encodeURIComponent(t.name)}&subject=${subjectId}&subjectName=${encodeURIComponent(subjectName)}&grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}">
+        <div>
+          <h4>${t.name}</h4>
+          ${t.description ? `<p>${t.description}</p>` : ''}
+        </div>
+        <span class="topic-arrow">→</span>
+      </a>
+    `).join('');
+  }
+</script>
+
+</body>
+</html>

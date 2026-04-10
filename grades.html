@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A+Prep — Choose Grade</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #4f6ef7;
+      --blue-dark: #3a56d4;
+      --cream:     #f7f8fc;
+      --dark:      #1e1e2e;
+      --gray:      #6b7280;
+      --border:    #e5e7eb;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--blue); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .nav-user { font-size: .9rem; color: var(--gray); }
+    .nav-user strong { color: var(--dark); }
+
+    .btn-logout {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+    main {
+      max-width: 860px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .page-header { margin-bottom: 2.5rem; }
+
+    .page-header h2 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-bottom: .4rem;
+    }
+
+    .page-header p { color: var(--gray); }
+
+    .grade-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+
+    .grade-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+      color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .grade-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 20px rgba(79,110,247,.15);
+      transform: translateY(-2px);
+    }
+
+    .grade-card .grade-icon {
+      font-size: 2rem;
+    }
+
+    .grade-card .grade-name {
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--gray);
+      padding: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="dashboard.html">A+<span>Prep</span></a>
+    <div class="nav-right">
+      <span class="nav-user">Hi, <strong id="userName"></strong></span>
+      <button class="btn-logout" id="logoutBtn">Log Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h2>Choose a Grade</h2>
+      <p>Select the grade level you'd like to study.</p>
+    </div>
+    <div class="grade-grid" id="gradeGrid">
+      <div class="loading">Loading grades…</div>
+    </div>
+  </main>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = 'https://anookzojonxupbcmwqfg.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFub29rem9qb254dXBiY213cWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzY3NzUsImV4cCI6MjA5MTM1Mjc3NX0.HoluuUkQu6cK4nCKQnsiPZoZB1b2yIEjk3Y227k3awQ';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; }
+
+  const user = session.user;
+  const name = user.user_metadata?.full_name || user.email.split('@')[0];
+  document.getElementById('userName').textContent = name.split(' ')[0];
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  const icons = ['🌱','📖','✏️','🔢','🌍','🔬','📐','🎨','💡','📚','🧠','⭐','🎓'];
+
+  const { data: grades, error } = await supabase
+    .from('grades')
+    .select('*')
+    .order('order_index');
+
+  const grid = document.getElementById('gradeGrid');
+
+  if (error || !grades.length) {
+    grid.innerHTML = '<p style="color:#ef4444">Failed to load grades.</p>';
+  } else {
+    grid.innerHTML = grades.map((g, i) => `
+      <a class="grade-card" href="subjects.html?grade=${g.id}&gradeName=${encodeURIComponent(g.name)}">
+        <div class="grade-icon">${icons[i] || '📘'}</div>
+        <div class="grade-name">${g.name}</div>
+      </a>
+    `).join('');
+  }
+</script>
+
+</body>
+</html>

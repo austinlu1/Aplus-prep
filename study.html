@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A+Prep — Study</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #4f6ef7;
+      --blue-dark: #3a56d4;
+      --cream:     #f7f8fc;
+      --dark:      #1e1e2e;
+      --gray:      #6b7280;
+      --border:    #e5e7eb;
+      --green:     #22c55e;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--blue); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .btn-back {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+
+    .btn-back:hover { border-color: var(--blue); color: var(--blue); }
+
+    .btn-logout {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+    main {
+      max-width: 720px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .breadcrumb {
+      font-size: .85rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* Progress */
+    .progress-bar-wrap {
+      background: var(--border);
+      border-radius: 999px;
+      height: 8px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: var(--blue);
+      height: 100%;
+      border-radius: 999px;
+      transition: width .4s ease;
+    }
+
+    .progress-label {
+      font-size: .85rem;
+      color: var(--gray);
+      margin-bottom: .5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Question card */
+    .q-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.07);
+      padding: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .q-number {
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--blue);
+      margin-bottom: .75rem;
+    }
+
+    .q-difficulty {
+      display: inline-block;
+      font-size: .75rem;
+      font-weight: 700;
+      padding: .2rem .65rem;
+      border-radius: 999px;
+      margin-left: .5rem;
+      text-transform: capitalize;
+    }
+
+    .q-difficulty.easy   { background: #dcfce7; color: #16a34a; }
+    .q-difficulty.medium { background: #fef9c3; color: #ca8a04; }
+    .q-difficulty.hard   { background: #fee2e2; color: #dc2626; }
+
+    .q-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Answer reveal */
+    .answer-section { display: none; }
+    .answer-section.visible { display: block; }
+
+    .answer-box {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .answer-box .label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: #16a34a;
+      margin-bottom: .4rem;
+    }
+
+    .answer-box .text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .explanation-box {
+      background: #eff6ff;
+      border: 1.5px solid #93c5fd;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .explanation-box .label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--blue);
+      margin-bottom: .4rem;
+    }
+
+    .explanation-box .text {
+      font-size: .95rem;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: .8rem 1.75rem;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-reveal {
+      background: var(--blue);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-reveal:hover { background: var(--blue-dark); }
+
+    .btn-next {
+      background: var(--dark);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-next:hover { background: #333; }
+
+    /* Completed */
+    .completed {
+      text-align: center;
+      background: white;
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,.07);
+      display: none;
+    }
+
+    .completed .trophy { font-size: 4rem; margin-bottom: 1rem; }
+    .completed h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: .5rem; }
+    .completed p { color: var(--gray); margin-bottom: 2rem; }
+
+    .btn-restart {
+      background: var(--blue);
+      color: white;
+      padding: .85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      margin-right: .75rem;
+      transition: all .2s;
+    }
+
+    .btn-restart:hover { background: var(--blue-dark); }
+
+    .btn-home {
+      background: var(--cream);
+      color: var(--dark);
+      padding: .85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all .2s;
+    }
+
+    .btn-home:hover { border-color: var(--blue); color: var(--blue); }
+
+    .loading {
+      text-align: center;
+      color: var(--gray);
+      padding: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="dashboard.html">A+<span>Prep</span></a>
+    <div class="nav-right">
+      <a class="btn-back" id="backBtn" href="grades.html">← Back</a>
+      <button class="btn-logout" id="logoutBtn">Log Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="breadcrumb" id="breadcrumb"></div>
+
+    <div id="studyArea">
+      <div class="loading">Loading questions…</div>
+    </div>
+
+    <div class="completed" id="completedCard">
+      <div class="trophy">🏆</div>
+      <h2>Topic Complete!</h2>
+      <p id="completedMsg">You've gone through all the questions in this topic.</p>
+      <div>
+        <button class="btn-restart" id="restartBtn">Study Again</button>
+        <a class="btn-home" id="backToTopics" href="grades.html">Choose Another Topic</a>
+      </div>
+    </div>
+  </main>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = 'https://anookzojonxupbcmwqfg.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFub29rem9qb254dXBiY213cWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzY3NzUsImV4cCI6MjA5MTM1Mjc3NX0.HoluuUkQu6cK4nCKQnsiPZoZB1b2yIEjk3Y227k3awQ';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  const params      = new URLSearchParams(window.location.search);
+  const topicId     = params.get('topic');
+  const topicName   = params.get('topicName')   || 'Topic';
+  const subjectId   = params.get('subject');
+  const subjectName = params.get('subjectName') || 'Subject';
+  const gradeId     = params.get('grade');
+  const gradeName   = params.get('gradeName')   || 'Grade';
+
+  if (!topicId) { window.location.href = 'grades.html'; }
+
+  const topicsUrl = `topics.html?subject=${subjectId}&subjectName=${encodeURIComponent(subjectName)}&grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}`;
+
+  document.getElementById('backBtn').href = topicsUrl;
+  document.getElementById('backToTopics').href = topicsUrl;
+  document.getElementById('breadcrumb').innerHTML = `
+    <a href="grades.html">Grades</a> ›
+    <a href="subjects.html?grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}">${gradeName}</a> ›
+    <a href="${topicsUrl}">${subjectName}</a> ›
+    ${topicName}
+  `;
+
+  const { data: questions, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('topic_id', topicId)
+    .order('created_at');
+
+  const studyArea = document.getElementById('studyArea');
+
+  if (error || !questions) {
+    studyArea.innerHTML = '<p style="color:#ef4444">Failed to load questions.</p>';
+  } else if (!questions.length) {
+    studyArea.innerHTML = '<p style="color:var(--gray);text-align:center;padding:3rem">No questions available for this topic yet.</p>';
+  } else {
+    let current = 0;
+
+    function render() {
+      if (current >= questions.length) {
+        studyArea.style.display = 'none';
+        const completed = document.getElementById('completedCard');
+        completed.style.display = 'block';
+        document.getElementById('completedMsg').textContent =
+          `You've gone through all ${questions.length} question${questions.length > 1 ? 's' : ''} in ${topicName}.`;
+        return;
+      }
+
+      const q = questions[current];
+      const pct = Math.round((current / questions.length) * 100);
+
+      studyArea.innerHTML = `
+        <div class="progress-label">
+          <span>Question ${current + 1} of ${questions.length}</span>
+          <span>${pct}% complete</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" style="width:${pct}%"></div>
+        </div>
+
+        <div class="q-card">
+          <div class="q-number">
+            Question ${current + 1}
+            <span class="q-difficulty ${q.difficulty || 'medium'}">${q.difficulty || 'medium'}</span>
+          </div>
+          <div class="q-text">${q.question}</div>
+
+          <div class="answer-section" id="answerSection">
+            <div class="answer-box">
+              <div class="label">Answer</div>
+              <div class="text">${q.answer}</div>
+            </div>
+            ${q.explanation ? `
+            <div class="explanation-box">
+              <div class="label">Explanation</div>
+              <div class="text">${q.explanation}</div>
+            </div>` : ''}
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-reveal" id="revealBtn">Show Answer</button>
+            <button class="btn btn-next" id="nextBtn" style="display:none">
+              ${current + 1 < questions.length ? 'Next Question →' : 'Finish 🎉'}
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('revealBtn').addEventListener('click', () => {
+        document.getElementById('answerSection').classList.add('visible');
+        document.getElementById('revealBtn').style.display = 'none';
+        document.getElementById('nextBtn').style.display = 'block';
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        current++;
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    render();
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      current = 0;
+      document.getElementById('completedCard').style.display = 'none';
+      studyArea.style.display = 'block';
+      render();
+    });
+  }
+</script>
+
+</body>
+</html>

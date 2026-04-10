@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A+Prep — Choose Subject</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #4f6ef7;
+      --blue-dark: #3a56d4;
+      --cream:     #f7f8fc;
+      --dark:      #1e1e2e;
+      --gray:      #6b7280;
+      --border:    #e5e7eb;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--blue); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .btn-back {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+
+    .btn-back:hover { border-color: var(--blue); color: var(--blue); }
+
+    .btn-logout {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+    main {
+      max-width: 860px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .breadcrumb {
+      font-size: .85rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .page-header { margin-bottom: 2.5rem; }
+
+    .page-header h2 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-bottom: .4rem;
+    }
+
+    .page-header p { color: var(--gray); }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .subject-card {
+      border-radius: 18px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .75rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+
+    .subject-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+    }
+
+    .subject-card .subject-icon { font-size: 2.8rem; }
+
+    .subject-card .subject-name {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .subject-card.math    { background: linear-gradient(135deg, #4f6ef7, #7c3aed); }
+    .subject-card.english { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+    .subject-card.science { background: linear-gradient(135deg, #10b981, #059669); }
+    .subject-card.history { background: linear-gradient(135deg, #f97316, #dc2626); }
+    .subject-card.default { background: linear-gradient(135deg, #6b7280, #374151); }
+
+    .loading {
+      text-align: center;
+      color: var(--gray);
+      padding: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="dashboard.html">A+<span>Prep</span></a>
+    <div class="nav-right">
+      <a class="btn-back" href="grades.html">← Grades</a>
+      <button class="btn-logout" id="logoutBtn">Log Out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="breadcrumb">
+      <a href="grades.html">Grades</a> › <span id="gradeLabel">…</span>
+    </div>
+    <div class="page-header">
+      <h2 id="pageTitle">Choose a Subject</h2>
+      <p>What would you like to study?</p>
+    </div>
+    <div class="subject-grid" id="subjectGrid">
+      <div class="loading">Loading subjects…</div>
+    </div>
+  </main>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = 'https://anookzojonxupbcmwqfg.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFub29rem9qb254dXBiY213cWZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzY3NzUsImV4cCI6MjA5MTM1Mjc3NX0.HoluuUkQu6cK4nCKQnsiPZoZB1b2yIEjk3Y227k3awQ';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'index.html'; }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  const gradeId   = params.get('grade');
+  const gradeName = params.get('gradeName') || 'Grade';
+
+  if (!gradeId) { window.location.href = 'grades.html'; }
+
+  document.getElementById('gradeLabel').textContent  = gradeName;
+  document.getElementById('pageTitle').textContent   = `${gradeName} — Choose a Subject`;
+
+  const subjectStyles = {
+    'math':    { cls: 'math',    icon: '➕' },
+    'english': { cls: 'english', icon: '📝' },
+    'science': { cls: 'science', icon: '🔬' },
+    'history': { cls: 'history', icon: '🏛️' },
+  };
+
+  const { data: subjects, error } = await supabase
+    .from('subjects')
+    .select('*')
+    .eq('grade_id', gradeId)
+    .order('name');
+
+  const grid = document.getElementById('subjectGrid');
+
+  if (error) {
+    grid.innerHTML = '<p style="color:#ef4444">Failed to load subjects.</p>';
+  } else if (!subjects.length) {
+    grid.innerHTML = '<p style="color:var(--gray)">No subjects available for this grade yet.</p>';
+  } else {
+    grid.innerHTML = subjects.map(s => {
+      const key   = s.name.toLowerCase();
+      const style = subjectStyles[key] || { cls: 'default', icon: '📘' };
+      return `
+        <a class="subject-card ${style.cls}"
+           href="topics.html?subject=${s.id}&subjectName=${encodeURIComponent(s.name)}&grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}">
+          <div class="subject-icon">${style.icon}</div>
+          <div class="subject-name">${s.name}</div>
+        </a>
+      `;
+    }).join('');
+  }
+</script>
+
+</body>
+</html>
