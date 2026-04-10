@@ -46,7 +46,6 @@
     }
 
     .nav-logo span { color: var(--blue); }
-
     .nav-right { display: flex; align-items: center; gap: 1rem; }
 
     .btn-back {
@@ -116,12 +115,22 @@
       transition: width .4s ease;
     }
 
+    .score-tracker {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: .88rem;
+      font-weight: 600;
+    }
+
+    .score-correct { color: #16a34a; }
+    .score-wrong   { color: var(--red); }
+
     .q-card {
       background: white;
       border-radius: 20px;
       box-shadow: 0 4px 24px rgba(0,0,0,.07);
       padding: 2.5rem;
-      margin-bottom: 1.5rem;
     }
 
     .q-meta {
@@ -158,7 +167,7 @@
       margin-bottom: 2rem;
     }
 
-    /* Answer options */
+    /* Options */
     .options {
       display: flex;
       flex-direction: column;
@@ -206,6 +215,7 @@
     .option-btn.correct {
       border-color: var(--green);
       background: #f0fdf4;
+      cursor: default;
     }
 
     .option-btn.correct .letter {
@@ -217,6 +227,8 @@
     .option-btn.wrong {
       border-color: var(--red);
       background: #fef2f2;
+      cursor: default;
+      opacity: .7;
     }
 
     .option-btn.wrong .letter {
@@ -227,68 +239,65 @@
 
     .option-btn:disabled { cursor: default; }
 
-    /* Feedback */
-    .feedback {
+    /* Action buttons row */
+    .action-row {
       display: none;
+      align-items: center;
+      gap: .75rem;
+      margin-top: 1.5rem;
+    }
+
+    .action-row.visible { display: flex; }
+
+    .btn-explanation {
+      flex: 1;
+      padding: .85rem 1rem;
+      background: #eff6ff;
+      color: var(--blue);
+      border: 2px solid #bfdbfe;
+      border-radius: 12px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-explanation:hover {
+      background: #dbeafe;
+    }
+
+    .btn-next-arrow {
+      width: 54px;
+      height: 54px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+    }
+
+    .btn-next-arrow:hover { background: var(--blue-dark); transform: translateX(2px); }
+
+    /* Explanation box */
+    .explanation-box {
+      display: none;
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
       border-radius: 12px;
       padding: 1.25rem 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .feedback.correct {
-      display: block;
-      background: #f0fdf4;
-      border: 1.5px solid #86efac;
-    }
-
-    .feedback.wrong {
-      display: block;
-      background: #fef2f2;
-      border: 1.5px solid #fca5a5;
-    }
-
-    .feedback .fb-title {
-      font-weight: 700;
-      font-size: .95rem;
-      margin-bottom: .4rem;
-    }
-
-    .feedback.correct .fb-title { color: #16a34a; }
-    .feedback.wrong   .fb-title { color: var(--red); }
-
-    .feedback .fb-explanation {
-      font-size: .9rem;
+      margin-top: 1rem;
+      font-size: .92rem;
       color: var(--dark);
       line-height: 1.6;
     }
 
-    .btn-next {
-      width: 100%;
-      padding: .9rem;
-      background: var(--blue);
-      color: white;
-      font-size: 1rem;
-      font-weight: 700;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all .2s;
-      display: none;
-    }
-
-    .btn-next:hover { background: var(--blue-dark); transform: translateY(-1px); }
-
-    /* Score tracker */
-    .score-tracker {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      font-size: .88rem;
-      font-weight: 600;
-    }
-
-    .score-correct { color: #16a34a; }
-    .score-wrong   { color: var(--red); }
+    .explanation-box.visible { display: block; }
 
     /* Completed */
     .completed {
@@ -301,10 +310,17 @@
     }
 
     .completed .trophy { font-size: 4rem; margin-bottom: 1rem; }
-    .completed h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: .5rem; }
-    .completed p  { color: var(--gray); margin-bottom: .5rem; }
-    .completed .final-score {
-      font-size: 1.3rem;
+
+    .completed h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: .5rem;
+    }
+
+    .completed p { color: var(--gray); margin-bottom: .5rem; }
+
+    .final-score {
+      font-size: 1.2rem;
       font-weight: 800;
       color: var(--blue);
       margin: 1rem 0 2rem;
@@ -333,7 +349,6 @@
       font-size: 1rem;
       font-weight: 700;
       border: 1.5px solid var(--border);
-      cursor: pointer;
       text-decoration: none;
       display: inline-block;
       transition: all .2s;
@@ -400,7 +415,7 @@
 
   const topicsUrl = `topics.html?subject=${subjectId}&subjectName=${encodeURIComponent(subjectName)}&grade=${gradeId}&gradeName=${encodeURIComponent(gradeName)}`;
 
-  document.getElementById('backBtn').href   = topicsUrl;
+  document.getElementById('backBtn').href      = topicsUrl;
   document.getElementById('backToTopics').href = topicsUrl;
   document.getElementById('breadcrumb').innerHTML = `
     <a href="grades.html">Grades</a> ›
@@ -426,16 +441,13 @@
     let correct = 0;
     let wrong   = 0;
 
-    const letters = ['a','b','c','d'];
-    const labels  = ['A','B','C','D'];
-
     function render() {
       if (current >= questions.length) {
         studyArea.style.display = 'none';
         const completed = document.getElementById('completedCard');
         completed.style.display = 'block';
         document.getElementById('completedMsg').textContent =
-          `You answered ${questions.length} question${questions.length > 1 ? 's' : ''} in ${topicName}.`;
+          `You finished all ${questions.length} question${questions.length > 1 ? 's' : ''} in ${topicName}.`;
         document.getElementById('finalScore').textContent =
           `✅ ${correct} correct  ·  ❌ ${wrong} incorrect`;
         return;
@@ -455,10 +467,9 @@
           <span class="score-correct">✅ ${correct} correct</span>
           <span class="score-wrong">❌ ${wrong} incorrect</span>
         </div>
-
         <div class="progress-label">
           <span>Question ${current + 1} of ${questions.length}</span>
-          <span>${pct}% complete</span>
+          <span>${pct}%</span>
         </div>
         <div class="progress-bar-wrap">
           <div class="progress-bar" style="width:${pct}%"></div>
@@ -471,7 +482,7 @@
           </div>
           <div class="q-text">${q.question}</div>
 
-          <div class="options">
+          <div class="options" id="options">
             ${opts.map(o => `
               <button class="option-btn" data-letter="${o.letter}">
                 <span class="letter">${o.label}</span>
@@ -480,52 +491,69 @@
             `).join('')}
           </div>
 
-          <div class="feedback" id="feedback">
-            <div class="fb-title" id="fbTitle"></div>
-            <div class="fb-explanation" id="fbExplanation"></div>
+          <div class="action-row" id="actionRow">
+            <button class="btn-explanation" id="btnExplanation">💡 Explanation</button>
+            <button class="btn-next-arrow" id="btnNext" title="Next question">→</button>
           </div>
 
-          <button class="btn-next" id="nextBtn">
-            ${current + 1 < questions.length ? 'Next Question →' : 'See Results 🎉'}
-          </button>
+          <div class="explanation-box" id="explanationBox">
+            ${q.explanation || ''}
+          </div>
         </div>
       `;
 
-      // Attach click handlers
+      let answered  = false;
+      let wrongCount = 0;
+      const totalOpts = opts.length;
+
+      function revealAnswer() {
+        // Disable all, highlight correct
+        document.querySelectorAll('.option-btn').forEach(b => {
+          b.disabled = true;
+          if (b.dataset.letter === q.correct_option) b.classList.add('correct');
+        });
+        document.getElementById('actionRow').classList.add('visible');
+      }
+
       document.querySelectorAll('.option-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+          if (answered) return;
           const chosen  = btn.dataset.letter;
           const isRight = chosen === q.correct_option;
 
-          // Disable all buttons
-          document.querySelectorAll('.option-btn').forEach(b => {
-            b.disabled = true;
-            if (b.dataset.letter === q.correct_option) b.classList.add('correct');
-            else if (b.dataset.letter === chosen && !isRight) b.classList.add('wrong');
-          });
-
-          // Show feedback
-          const feedback = document.getElementById('feedback');
-          const fbTitle  = document.getElementById('fbTitle');
-          const fbExp    = document.getElementById('fbExplanation');
-
           if (isRight) {
+            answered = true;
             correct++;
-            feedback.className = 'feedback correct';
-            fbTitle.textContent = '✅ Correct!';
+            btn.classList.add('correct');
+            btn.disabled = true;
+            // Disable remaining
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            document.getElementById('actionRow').classList.add('visible');
           } else {
+            wrongCount++;
             wrong++;
-            feedback.className = 'feedback wrong';
-            const correctText = opts.find(o => o.letter === q.correct_option)?.text || '';
-            fbTitle.textContent = `❌ Not quite — the correct answer is: ${correctText}`;
-          }
+            btn.classList.add('wrong');
+            btn.disabled = true;
 
-          fbExp.textContent = q.explanation || '';
-          document.getElementById('nextBtn').style.display = 'block';
+            // If all wrong options exhausted, reveal correct
+            if (wrongCount >= totalOpts - 1) {
+              answered = true;
+              revealAnswer();
+            }
+          }
         });
       });
 
-      document.getElementById('nextBtn').addEventListener('click', () => {
+      // Explanation toggle
+      document.getElementById('btnExplanation').addEventListener('click', () => {
+        const box = document.getElementById('explanationBox');
+        const btn = document.getElementById('btnExplanation');
+        box.classList.toggle('visible');
+        btn.textContent = box.classList.contains('visible') ? '💡 Hide Explanation' : '💡 Explanation';
+      });
+
+      // Next arrow
+      document.getElementById('btnNext').addEventListener('click', () => {
         current++;
         render();
         window.scrollTo({ top: 0, behavior: 'smooth' });
